@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brot &amp; Butter - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0c16;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --error-color: #f43f5e;
+      --error-bg: rgba(244, 63, 94, 0.15);
+      --success-color: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient glowing background shapes */
+    .ambient-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: 0;
+      opacity: 0.6;
+      animation: float 12s ease-in-out infinite alternate;
+    }
+
+    .glow-1 {
+      top: -10%;
+      left: -10%;
+      width: 40vw;
+      height: 40vw;
+      background: radial-gradient(circle, #4f46e5, transparent 70%);
+    }
+
+    .glow-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, #c084fc, transparent 70%);
+      animation-delay: -6s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        transform: translate(50px, 30px) scale(1.1);
+      }
+    }
+
+    /* Core container */
+    .container {
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Glass Card */
+    .login-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+
+    .logo-icon {
+      font-size: 28px;
+      color: #fff;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    /* Error Message */
+    .error-banner {
+      display: none;
+      background: var(--error-bg);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: 24px;
+      align-items: center;
+      gap: 10px;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Form Fields */
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text-main);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 12px var(--accent-glow);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .input-label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: all 0.3s ease;
+      font-size: 15px;
+    }
+
+    /* Floating label effects */
+    .input-field:focus ~ .input-label,
+    .input-field:not(:placeholder-shown) ~ .input-label {
+      top: 0;
+      font-size: 12px;
+      color: var(--accent-color);
+      background-color: var(--bg-primary);
+      padding: 0 6px;
+      border-radius: 4px;
+      transform: translateY(-50%) translateX(-4px);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      color: #ffffff;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(1px);
+    }
+
+    /* Links Footer */
+    .footer-links {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .link {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .link:hover {
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambient Glow -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="container">
+    <div class="login-card">
+      <div class="header">
+        <div class="logo-container">
+          <!-- Toast Icon / Bread representing Brot und Butter -->
+          <span class="logo-icon">🍞</span>
+        </div>
+        <h1 class="title">Brot &amp; Butter</h1>
+        <p class="subtitle">Melden Sie sich an, um fortzufahren</p>
+      </div>
+
+      <!-- Failure message banner -->
+      <div id="errorBanner" class="error-banner">
+        <span style="font-size: 18px;">⚠️</span>
+        <span>Benutzername oder Passwort ist falsch!</span>
+      </div>
+
+      <form action="login" method="POST">
+        <div class="form-group">
+          <input type="text" id="user" name="user" class="input-field" placeholder=" " required autocomplete="username">
+          <label for="user" class="input-label">Benutzername</label>
+        </div>
+
+        <div class="form-group">
+          <input type="password" id="passwd" name="passwd" class="input-field" placeholder=" " required autocomplete="current-password">
+          <label for="passwd" class="input-label">Passwort</label>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <span>Anmelden</span>
+          <span style="font-size: 14px;">➔</span>
+        </button>
+      </form>
+
+      <div class="footer-links">
+        <a href="index.html" class="link"> Zurück zur Startseite</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Show error banner if "error=true" is passed in URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'true') {
+      const banner = document.getElementById('errorBanner');
+      if (banner) {
+        banner.style.display = 'flex';
+      }
+    }
+  </script>
+</body>
+</html>

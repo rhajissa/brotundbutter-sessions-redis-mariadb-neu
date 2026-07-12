@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Build directories
+/build/
+/target/
+/tmp/
+out/
+
+# App temporary / generated files
+/printed_receipts/
+/app/latency_plot.png
+
+# Sensitive data / Local configurations (contains DB/Redis passwords)
+/local/

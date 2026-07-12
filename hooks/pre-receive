@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# pre-receive hook to check Java formatting on pushed commits
+errors=0
+
+while read oldrev newrev refname; do
+    # Only check branch updates (pushes to branches)
+    if [[ "$refname" =~ ^refs/heads/ ]]; then
+        # Get list of Java files modified/added in this push
+        if [ "$oldrev" = "0000000000000000000000000000000000000000" ]; then
+            # New branch push - check all Java files in this revision
+            files=$(git ls-tree -r --name-only "$newrev" | grep '\.java$')
+        else
+            # Existing branch push - check only diffed Java files
+            files=$(git diff --name-only --diff-filter=ACM "$oldrev" "$newrev" | grep '\.java$')
+        fi
+        
+        for file in $files; do
+            # Extract content of file from git blob database
+            content=$(git show "$newrev:$file")
+            
+            # 1. Check for tab characters (indentation should be spaces)
+            if echo "$content" | grep -q $'\t'; then
+                echo "Format Error in $file (Commit ${newrev:0:7}): Tab characters found. Please use spaces for indentation." >&2
+                errors=$((errors + 1))
+            fi
+            
+            # 2. Check for trailing spaces or tabs
+            if echo "$content" | grep -q '[[:blank:]]$'; then
+                echo "Format Error in $file (Commit ${newrev:0:7}): Trailing whitespace found." >&2
+                errors=$((errors + 1))
+            fi
+        done
+    fi
+done
+
+if [ $errors -ne 0 ]; then
+    echo "=== Formatting check failed! Push rejected. ===" >&2
+    exit 1
+fi
+
+exit 0
