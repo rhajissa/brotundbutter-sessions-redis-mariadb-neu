@@ -44,8 +44,8 @@ public class PrintDaemon {
         // 4. Endlosschleife zum Verarbeiten der Warteschlange
         while (true) {
             try {
-                // blockierendes Pop aus der Queue
-                List<String> popped = redis.brpop(0, "print_queue");
+                // blockierendes Pop aus der Queue with 5 seconds timeout
+                List<String> popped = redis.brpop(5, "print_queue");
                 if (popped != null && popped.size() >= 2) {
                     String json = popped.get(1);
                     System.out.println("Empfangener Druckauftrag: " + json);

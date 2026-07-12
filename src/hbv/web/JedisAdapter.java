@@ -31,7 +31,7 @@ public class JedisAdapter {
 
           JedisClientConfig clientConfig = DefaultJedisClientConfig.builder()
             .password(password)
-            .timeoutMillis(2000)
+            .timeoutMillis(7000)
             .build();
 
           redisClient = RedisClient.builder()
