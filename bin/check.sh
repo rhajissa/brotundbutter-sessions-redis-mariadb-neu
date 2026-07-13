@@ -10,7 +10,7 @@ curl -s "$path/session-status"
 echo -e "\n"
 
 echo "=== 2. Authentifizierung durchführen ==="
-curl -L -c "$cookie" -b "$cookie" "$path/login?user=admin&passwd=admin"
+curl -L -c "$cookie" -b "$cookie" "$path/login?user=admin&passwd=admin" > /dev/null
 echo -e "\n"
 
 echo "=== 3. Session-Status nach Login prüfen ==="
