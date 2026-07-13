@@ -17,8 +17,8 @@ public class LoginServlet extends HttpServlet {
       String user=request.getParameter("user");
       String passwd=request.getParameter("passwd");
 
-      // check if valid combination
-      if (user != null && !user.trim().isEmpty() && passwd != null && !passwd.trim().isEmpty()){
+      // check if valid combination (only admin/admin)
+      if ("admin".equals(user) && "admin".equals(passwd)){
         // prevent session fixation
         HttpSession oldSession = request.getSession(false);
         if (oldSession != null) {
@@ -28,7 +28,7 @@ public class LoginServlet extends HttpServlet {
         HttpSession session=request.getSession();
         session.setAttribute("user",user);
 
-        response.sendRedirect("protected");
+        response.sendRedirect("dashboard.html");
       } else {
         response.sendRedirect("login.html?error=true");
       }

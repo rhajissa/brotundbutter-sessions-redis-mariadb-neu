@@ -22,11 +22,11 @@ curl -L -c "$cookie" -b "$cookie" "$path/borrow?action=checkMember&code=M10001"
 echo -e "\n"
 
 echo "=== 5. Funktionstest: Exemplar für Ausleihe prüfen (checkExemplar) ==="
-curl -L -c "$cookie" -b "$cookie" "$path/borrow?action=checkExemplar&code=100"
+curl -L -c "$cookie" -b "$cookie" "$path/borrow?action=checkExemplar&code=200002"
 echo -e "\n"
 
 echo "=== 6. Funktionstest: Exemplar für Rückgabe prüfen (checkExemplar) ==="
-curl -L -c "$cookie" -b "$cookie" "$path/return?action=checkExemplar&code=100"
+curl -L -c "$cookie" -b "$cookie" "$path/return?action=checkExemplar&code=200002"
 echo -e "\n"
 
 echo "=== 7. Abmelden (Logout) ==="
