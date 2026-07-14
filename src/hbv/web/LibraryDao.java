@@ -127,7 +127,7 @@ public class LibraryDao {
     }
 
     // 2. Check if book copy exists and its availability
-    public ExemplarInfo checkExemplar(int code) throws SQLException {
+    private ExemplarInfo queryExemplar(Connection conn, int code, boolean forUpdate) throws SQLException {
         String sql = "select be.id, be.code, b.titel, a.autoren, " +
                      "(select count(*) from BIB_Ausleihe au where au.buchexemplar_id = be.id and au.tatsaechliche_rueckgabe is null) as ausgeliehen " +
                      "from BIB_Buchexemplar be " +
@@ -138,10 +138,9 @@ public class LibraryDao {
                      "  join BIB_Autorin a on a.id = ab.autorin_id " +
                      "  group by ab.buch_id " +
                      ") a on a.buch_id = b.id " +
-                     "where be.code = ?";
+                     "where be.code = ?" + (forUpdate ? " FOR UPDATE" : "");
 
-        try (Connection conn = ds.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, code);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -154,6 +153,12 @@ public class LibraryDao {
             }
         }
         return null;
+    }
+
+    public ExemplarInfo checkExemplar(int code) throws SQLException {
+        try (Connection conn = ds.getConnection()) {
+            return queryExemplar(conn, code, false);
+        }
     }
 
     // 3. executeBorrowTransaction (Transactional, Pessimistic Locking via SELECT FOR UPDATE)
@@ -186,38 +191,16 @@ public class LibraryDao {
                 int code = Integer.parseInt(codeStr.trim());
 
                 // 2. Lock and Check Exemplar
-                int exemplarId = -1;
-                String title = "";
-                String author = "";
-                String selectSql = "select be.id, b.titel, a.autoren, " +
-                                   "(select count(*) from BIB_Ausleihe au where au.buchexemplar_id = be.id and au.tatsaechliche_rueckgabe is null) as ausgeliehen " +
-                                   "from BIB_Buchexemplar be " +
-                                   "left join BIB_Buch b ON be.buch_id = b.id " +
-                                   "left join (" +
-                                   "  select ab.buch_id, group_concat(a.name SEPARATOR '-') as autoren " +
-                                   "  from BIB_Autorin_Buch ab " +
-                                   "  join BIB_Autorin a on a.id = ab.autorin_id " +
-                                   "  group by ab.buch_id " +
-                                   ") a on a.buch_id = b.id " +
-                                   "where be.code = ? FOR UPDATE";
-
-                try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
-                    ps.setInt(1, code);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) {
-                            boolean isBorrowed = rs.getInt("ausgeliehen") > 0;
-                            if (isBorrowed) {
-                                throw new IllegalStateException("Exemplar " + code + " ist bereits verliehen.");
-                            }
-                            exemplarId = rs.getInt("id");
-                            title = rs.getString("titel");
-                            author = rs.getString("autoren");
-                            if (author == null) author = "Unbekannt";
-                        } else {
-                            throw new IllegalArgumentException("Exemplar " + code + " nicht gefunden.");
-                        }
-                    }
+                ExemplarInfo info = queryExemplar(conn, code, true);
+                if (info == null) {
+                    throw new IllegalArgumentException("Exemplar " + code + " nicht gefunden.");
                 }
+                if (info.isBorrowed) {
+                    throw new IllegalStateException("Exemplar " + code + " ist bereits verliehen.");
+                }
+                int exemplarId = info.id;
+                String title = info.title;
+                String author = info.author;
 
                 // 3. Record loan
                 try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
